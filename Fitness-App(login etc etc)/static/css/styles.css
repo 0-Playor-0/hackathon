@@ -1,28 +1,23 @@
-/* Add your custom styles here */
 
-/* Navbar */
 .navbar {
     background-color: #f8f9fa;
     border-bottom: 1px solid #dee2e6;
 }
 
-/* Widgets */
 .widget {
     border: 1px solid #ccc;
     padding: 20px;
     margin-bottom: 20px;
 }
 
-/* Posts */
+
 .post {
     margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #ccc;
 }
 
-/* Modal */
+
 .modal-dialog {
     max-width: 80%;
 }
-
-/* Add more styles as needed */
