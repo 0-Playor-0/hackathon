@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="mb-4">Profile</h1>
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="age" class="form-label">Age</label>
+                        <input type="text" class="form-control" id="age" name="age" value="{{ user_info['age'] }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" value="{{ user_info['location'] }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="weight" class="form-label">Weight (kg)</label>
+                        <input type="text" class="form-control" id="weight" name="weight" value="{{ user_info['weight'] }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="height" class="form-label">Height (cm)</label>
+                        <input type="text" class="form-control" id="height" name="height" value="{{ user_info['height'] }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="goal" class="form-label">Fitness Goal</label>
+                        <input type="text" class="form-control" id="goal" name="goal" value="{{ user_info['goal'] }}">
+                    </div>
+               
+                  <div class="mb-3">
+                      <label for="activity" class="form-label">Activity Level</label>
+                      <select class="form-control" id="activity" name="activity">
+                          <option value="sedentary" {% if user_info['activity'] == 'sedentary' %}selected{% endif %}>Sedentary</option>
+                          <option value="lightly_active" {% if user_info['activity'] == 'lightly_active' %}selected{% endif %}>Lightly Active</option>
+                          <option value="moderately_active" {% if user_info['activity'] == 'moderately_active' %}selected{% endif %}>Moderately Active</option>
+                          <option value="very_active" {% if user_info['activity'] == 'very_active' %}selected{% endif %}>Very Active</option>
+                          <option value="super_active" {% if user_info['activity'] == 'super_active' %}selected{% endif %}>Super Active</option>
+                      </select>
+                  </div>
+
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
