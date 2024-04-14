@@ -522,7 +522,6 @@ def disconnect():
 def generate_dalle_response(message):
     import openai
 
-    openai.api_key = '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'
 
     prompt = message
 
@@ -537,7 +536,6 @@ def generate_chatgpt_response(message):
     import openai
 
     # API key here
-    openai.api_key = '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'
 
     prompt = message
 
