@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room: {{ room_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .message-box {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+        }
+
+        .message-user {
+            font-weight: bold;
+            color: #007bff;
+            margin-right: 10px;
+        }
+
+        .message-content {
+            color: #333;
+        }
+
+        .message-timestamp {
+            color: #999;
+            font-size: 0.8em;
+        }
+
+        .input-form {
+            margin-top: 20px;
+            display: flex;
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        #send-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #send-button:hover {
+            background-color: #0056b3;
+        }
+        .message-image {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+        }   
+    </style>
+</head>
+<body>
+<div class="message-box">
+    <h2>Chat Room: {{ room_name }}</h2>
+    <div class="messages" id="messages-container">
+        {% for message in messages %}
+            <div class="message">
+            <span class="message-user">{{ message.name }}</span>
+            <span class="message-content">{{ message.message }}</span>
+            <span class="message-timestamp">{{ message.timestamp }}</span>
+            {% if message.image %}
+                <img class="message-image" src="{{ message.image }}" alt="Message Image">
+            {% elif message.message.startsWith('http') %}
+                <img class="message-image" src="{{ message.message }}" alt="Message Image">
+            {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="input-form">
+        <input type="text" id="message-input" placeholder="Type your message...">
+        <button type="button" id="send-button">Send</button>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<!-- Your custom JavaScript code -->
+<script type ="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Socket.IO client
+        const socket = io();
+
+        // Get DOM elements
+        const messages = document.getElementById("messages-container");
+        const messageInput = document.getElementById("message-input");
+        const sendButton = document.getElementById("send-button");
+
+        // Get session username
+        const username = "{{ session['username'] }}";
+
+        // Function to create a new message element
+        function createMessage(name, content) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message");
+
+            const userSpan = document.createElement("span");
+            userSpan.classList.add("message-user");
+            userSpan.textContent = name;
+
+            const contentSpan = document.createElement("span");
+            contentSpan.classList.add("message-content");
+            contentSpan.textContent = content;
+
+            messageDiv.appendChild(userSpan);
+            messageDiv.appendChild(contentSpan);
+
+            messages.appendChild(messageDiv);
+        }
+
+        // Send message function
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message !== "") {
+                socket.emit("message", { name: username, message: message });
+                messageInput.value = "";
+            }
+        }
+
+        // Event listener for send button click
+        sendButton.addEventListener("click", () => {
+            sendMessage();
+        });
+
+        // Event listener for receiving messages from the server
+        socket.on("message", (data) => {
+            createMessage(data.name, data.message);
+        });
+
+        // Log connection status
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        // Log disconnection status
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+    });
+</script>
+</body>
+</html>

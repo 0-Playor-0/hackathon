@@ -15,7 +15,6 @@
             justify-content: center;
             align-items: flex-start;
             height: 100vh;
-            position: relative; /* Added to enable positioning of message input */
         }
         .chat-list {
             width: 30%;
@@ -85,32 +84,21 @@
             flex: 1;
             padding: 20px;
             box-sizing: border-box;
-            overflow-y: auto; /* Added to enable scrolling */
         }
         .chat-display h2 {
             margin-top: 0;
         }
-        .message-input {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1;
-            width: 90%;
-            max-width: 500px;
-            background-color: white;
-            padding: 10px;
-            border: 1px solid #ccc;
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
             border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: none; /* Initially hide the input */
+            cursor: pointer;
         }
-        .message-input input[type="text"] {
-            width: calc(100% - 80px);
-            margin-right: 10px;
-        }
-        .message-input button {
-            width: 70px;
+        .btn:hover {
+            background-color: #0056b3;
         }
 
         /* Popup styles */
@@ -146,9 +134,8 @@
                 <!-- List of existing chat spaces will be dynamically added here -->
                 {% for user in userData %}
                 <li>
-                    <div class="chat-space" onclick="selectChat('{{ user.chat_name }}')">
+                    <div class="chat-space" onclick="selectChat('{{ user.chat_name }}', event)">
                         <span>{{ user.chat_name }}</span>
-                        <!-- Pass the chat_name as an argument to openAddMemberPopup function -->
                         <button class="add-member-btn" onclick="openAddMemberPopup('{{ user.chat_name }}')">+</button>
                     </div>
                 </li>
@@ -159,10 +146,7 @@
             </div>
         </div>
         <div class="chat-display" id="chatDisplay">
-           <!-- Add this HTML code inside the chat-display div -->
-            <div id="chatMessages">
-                <!-- Chat messages will be displayed here -->
-            </div>
+            <!-- Chat content will be displayed here -->
         </div>
     </div>
 
@@ -188,7 +172,7 @@
     
     <div class="popup-form" id="addMemberPopup">
         <h3>Add New Member</h3>
-        <form onsubmit="addMember()" id="addMemberForm"> <!-- Add id attribute for easy access -->
+        <form onsubmit="addMember()" method="post">
             <!-- Hidden input field to store the selected chat name -->
             <input type="hidden" id="selectedChat" name="chatName" value="" />
             <label for="memberName">Member Name:</label>
@@ -199,7 +183,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script> <!-- Include Socket.IO library -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script>
         // Function to open the popup form
@@ -214,7 +197,7 @@
         function closePopup() {
             var popupForm = document.getElementById("popupForm");
             var overlay = document.getElementById("overlay");
-            popupForm.style.display = "none";
+            popupForm.style.display = "none            ";
             overlay.style.display = "none";
         }
 
@@ -232,7 +215,7 @@
             }
             return false; // Prevent form submission
         }
-        
+
         // Function to open the add member popup
         function openAddMemberPopup(chatName) {
             var addMemberPopup = document.getElementById("addMemberPopup");
@@ -283,50 +266,45 @@
             return false; // Prevent form submission
         }
 
-        
-        //Connect to the Socket.IO server
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        // Example: Load existing chat spaces dynamically
+        window.onload = function() {
+            var chatList = document.getElementById("chatList");
+            //var existingChats = ["Chat Space 1", "Chat Space 2", "Chat Space 3"];
+            const fs = require('fs')
+            fs.readFile('storage\\userData.txt', (err, inputD) => {
+                if (err) throw err;
+                inputD = eval(inputD);
+            })
+            var existingChats = inputD
+            console.log(existingChats)
+            existingChats.forEach(function(chat) {
+                var listItem = document.createElement("li");
+                var chatSpace = document.createElement("div");
+                chatSpace.className = "chat-space";
+                chatSpace.textContent = chat['chat_name'];
+                chatSpace.onclick = function() {
+                    selectChat(chat['chat_name']);
+                };
+                var addMemberBtn = document.createElement("button");
+                addMemberBtn.className = "add-member-btn";
+                addMemberBtn.textContent = "+";
+                addMemberBtn.onclick = function(event) {
+                    event.stopPropagation(); // Prevent the chat space click event from firing
+                    openAddMemberPopup();
+                };
+                chatSpace.appendChild(addMemberBtn);
+                listItem.appendChild(chatSpace);
+                chatList.appendChild(listItem);
+            });
+        };
 
-        // Function to send a message
-        function sendMessage() {
-            var messageInput = document.getElementById("messageInput");
-            var message = messageInput.value.trim();
-            if (message !== "") {
-                var chatName = document.getElementById("chatDisplay").querySelector("h2").innerText;
-                
-                // Send the message to the backend
-                socket.emit("send_message", {
-                    chatName: chatName,
-                    message: message
-                });
-
-                // Clear the message input
-                messageInput.value = "";
+        function selectChat(chatName, event) {
+            var chatDisplay = document.getElementById("chatDisplay");
+            if (event.target.className!== "add-member-btn") {
+                window.location.href = `http://127.0.0.1:5000/community/${chatName}`;
+                // Additional logic to display chat content can be added here
             }
         }
-
-        // Function to handle receiving a message from the server
-        socket.on('receive_message', function(message) {
-            // Append the received message to the chat display
-            appendMessage(message);
-        });
-
-        // Function to append messages to the chat display
-        function appendMessage(message) {
-            var chatMessages = document.getElementById("chatMessages");
-            var messageElement = document.createElement("p");
-            messageElement.textContent = `${message.sender} (${new Date(message.timestamp).toLocaleTimeString()}): ${message.message}`;
-            chatMessages.appendChild(messageElement);
-        }
-        // When sending a message from the client
-        socket.emit("send_message", {
-            chatName: chatName,
-            message: {
-                sender: "username", // Replace "username" with the actual sender's username
-                message: "Your message here",
-                timestamp: new Date().toISOString() // Example timestamp
-            }
-        });
     </script>
 </body>
 </html>
