@@ -78,9 +78,10 @@ def profile():
             users[username]['height'] = height
             users[username]['goal'] = goal
             users[username]['activity'] = activity
+            users[username]['points']
             with open('users.txt', 'w') as file:
                 for user, data in users.items():
-                    file.write(f"{user}:{data['password']}:{data['age']}:{data['location']}:{data['weight']}:{data['height']}:{data['goal']}:{data['activity']}\n")
+                    file.write(f"{user}:{data['password']}:{data['age']}:{data['location']}:{data['weight']}:{data['height']}:{data['goal']}:{data['activity']}:{data['points']}\n")
             session['profile'] = users[username]
             return redirect(url_for('index'))
         else:
@@ -434,7 +435,8 @@ def message(data):
                 break
     if Flag == None:        
         session['points'] += 5
-        session['feeling'] = "Ok"
+        if not data.get("message").strip().lower().startswith("@fitbot"):
+            session['feeling'] = "Ok"
     else:
         session['feeling'] = Flag
     
@@ -444,6 +446,9 @@ def message(data):
 
     # Check if the message starts with "@Fitbot" (case insensitive)
     if data.get("message").strip().lower().startswith("@fitbot"):
+        import openai
+
+        openai.api_key = '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'
         # Call ChatGPT API to generate a response
         input_text = f"Scenario: I am feeling {session['feeling']}.Keep what im feeling in mind while responding Query: " + data.get("message")
         input_text = str(input_text)        
@@ -464,6 +469,11 @@ def message(data):
         session['points'] -= 5
     # Check if the message starts with "@Fitbot" (case insensitive)
     if data.get("message").strip().lower().startswith("@picbot"):
+        import openai
+
+        openai.api_key = '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'
+
+
         # Call ChatGPT API to generate a response
         input_text = data['message']
         input_text = str(input_text)        
