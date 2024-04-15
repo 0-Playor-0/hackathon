@@ -1,2 +1,2 @@
 # Hackathon
-Our team's project for the hackathon. More description coming soon
+Our team's project for the hackathon. Code is in MASTER BRANCH
